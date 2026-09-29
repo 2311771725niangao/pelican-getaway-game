@@ -76,35 +76,89 @@
     return 350;
   }
 
+
+  // ---------- 滑翔地形片段 ----------
+  // 断桥宽度按当前速度换算成“空中时间”：纯跳约 0.67 秒，起跳后长按滑翔可达 1.3 秒左右
+  function gapFish(x, w, n, hi) {
+    for (let i = 0; i < n; i++) {
+      const u = i / (n - 1);
+      addFish(x + w * (0.08 + 0.84 * u), hi - 105 * u * u + 14 * Math.sin(u * 3), false);
+    }
+  }
+  function tutorialGap(b) {
+    const w = Math.max(230, S.speed * 0.78), x = b + 300;
+    S.addGap(x, w); S.addPad(x + w + 14, 78);
+    gapFish(x, w, 6, 210);
+    return 300 + w + 340;
+  }
+  function bridgeGap(b) {
+    const w = Math.max(260, S.speed * G.rand(0.85, 1.08)), x = b + 300;
+    S.addGap(x, w); S.addPad(x + w + 14, 78);
+    gapFish(x, w, 8, 215);
+    if (S.stage >= 1 && Math.random() < 0.6) S.addRing(x + w * 0.5, 165);
+    return 300 + w + 340;
+  }
+  function kiteLine(b) {
+    const w = Math.max(200, S.speed * G.rand(0.5, 0.66)), x = b + 240;
+    S.addKite(x, w, 16);
+    line(x + 10, 150, Math.max(3, Math.round(w / 50)), 46);
+    return 240 + w + 300;
+  }
+  function windGap(b) {
+    const w = Math.max(440, S.speed * G.rand(1.35, 1.55)), x = b + 300;
+    S.addGap(x, w); S.addPad(x + w + 14, 78);
+    S.addUpdraft(x + w * 0.3, 130, 330);
+    gapFish(x, w * 0.3, 3, 190);
+    S.addRing(x + w * 0.3 + 65, 225); S.addRing(x + w * 0.62, 185);
+    line(x + w * 0.5, 170, 4, 40);
+    return 300 + w + 360;
+  }
+  function ringChain(b) {
+    const x = b + 240, st = Math.max(120, S.speed * 0.3);
+    S.addUpdraft(x, 120, 300);
+    for (let i = 0; i < 4; i++) S.addRing(x + 160 + i * st, 225 - i * 26);
+    arc(x + 160 + st * 1.5, st * 1.6, 235, 9);
+    return 240 + 160 + 4 * st + 300;
+  }
+
   // 喘息带：一长串鱼、没有障碍，玩家可以稳住节奏、拉开距离
   function breather(b) {
     line(b + 20, 28, 9, 44); line(b + 20 + 9 * 44 + 30, 92, 5, 44);
     return 9 * 44 + 30 + 5 * 44 + 80;
   }
 
+  // st：只在该赛段及以后出现；w 是基础权重，wS 是按赛段的权重覆盖
   const KINDS = [
     { w: 4, min: 0, fn: single }, { w: 2, min: 0, fn: fishLine }, { w: 1.6, min: 10, fn: sky },
-    { w: 2.2, min: 22, fn: gull }, { w: 2, min: 32, fn: double }, { w: 1.6, min: 55, fn: combo },
+    { w: 2.2, min: 24, fn: gull }, { w: 2, min: 48, fn: double }, { w: 1.6, min: 80, fn: combo },
+    { wS: [0, 2.6, 2, 2.2], st: 1, fn: bridgeGap }, { wS: [0, 1.6, 1.4, 1.4], st: 1, fn: kiteLine },
+    { wS: [0, 0, 3, 2.6], st: 2, fn: windGap }, { wS: [0, 0, 2.2, 1.6], st: 2, fn: ringChain },
   ];
+  const wOf = (k) => (k.wS ? k.wS[Math.min(S.stage, 3)] : k.w);
   let last = null;
+  S.tutDone = false;
+  const baseReset = S.reset;
+  S.reset = function () { baseReset(); S.tutDone = false; last = null; };
 
   S.updateSpawn = function (dt) {
     S.nextSpawn -= S.speed * dt;
     S.goldT -= dt;
-    if (S.nextSpawn > 0 || S.rt < 1.4 || S.meters > S.finishM() - 22) return;
+    if (S.nextSpawn > 0 || S.rt < 1.4 || S.meters > S.finishM() - 30) return;
     const base = spawnX() + S.nextSpawn;
     let len, fn;
-    if (S.meters >= S.restM && S.mode === 'race') { fn = breather; S.restM += 200; }
+    if (!S.tutDone && S.mode === 'race' && S.meters > 110) { fn = tutorialGap; S.tutDone = true; }
+    else if (S.meters >= S.restM && S.mode === 'race') { fn = breather; S.restM += 260; }
     else if (S.goldT <= 0 && S.rt > 18) { fn = golden; S.goldT = G.rand(26, 36); }
     else {
-      const pool = KINDS.filter((k) => S.rt >= k.min && k.fn !== last);
-      let r = Math.random() * pool.reduce((s, k) => s + k.w, 0);
+      const pool = KINDS.filter((k) => S.rt >= (k.min || 0) && wOf(k) > 0 && k.fn !== last);
+      let r = Math.random() * pool.reduce((s, k) => s + wOf(k), 0);
       fn = pool[0].fn;
-      for (const k of pool) { r -= k.w; if (r <= 0) { fn = k.fn; break; } }
+      for (const k of pool) { r -= wOf(k); if (r <= 0) { fn = k.fn; break; } }
     }
     len = fn(base);
-    last = fn === fishLine || fn === sky ? fn : null;
-    const space = G.lerp(1.05, 0.62, G.clamp(S.rt / 90, 0, 1)) * G.rand(0.9, 1.15);
-    S.nextSpawn += len + S.speed * (fn === fishLine || fn === sky ? space * 0.45 : space);
+    last = fn === fishLine || fn === sky || fn === bridgeGap || fn === windGap ? fn : null;
+    const space = G.lerp(1.05, 0.6, G.clamp(S.rt / 130, 0, 1)) * G.rand(0.9, 1.15);
+    const terrain = fn === tutorialGap || fn === bridgeGap || fn === windGap || fn === kiteLine || fn === ringChain;
+    S.nextSpawn += len + S.speed * (fn === fishLine || fn === sky ? space * 0.45 : terrain ? space * 0.85 : space);
   };
 })();

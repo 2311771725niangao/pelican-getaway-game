@@ -29,7 +29,9 @@
       S.say(G.pick(G.Copy.GOLD));
       return;
     }
-    S.fishCount++; S.combo++; S.comboT = 1.1;
+    S.fishCount++; S.combo += p.gliding ? 2 : 1; S.comboT = 1.1;
+    if (p.gliding) { S.run.glideFish++; S.bonus += 5 * S.mult; }
+    else if (S.mult > 1) S.bonus += 3 * (S.mult - 1);
     if (S.combo > S.run.combo) S.run.combo = S.combo;
     S.gapGain += C.FISH_GAIN;
     p.fishVis = Math.min(10, p.fishVis + 0.6);

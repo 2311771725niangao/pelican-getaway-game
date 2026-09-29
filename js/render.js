@@ -74,7 +74,7 @@
 
   function speedLines(ctx) {
     const p = S.p, k = G.clamp((S.speed - 380) / 260, 0, 1) * 0.6 + (p.turbo > 0 ? 0.6 : 0);
-    if (k < 0.05 || S.state === 'title') return;
+    if (k < 0.05 || S.idle()) return;
     ctx.save(); ctx.lineCap = 'round';
     ctx.strokeStyle = p.turbo > 0 ? '#ffeeaa' : '#ffffff';
     for (let i = 0; i < 14; i++) {
@@ -99,13 +99,16 @@
     ctx.translate(0, lay.oy);
     G.Scene.drawBack(ctx, cam);
     G.Scene.drawRoad(ctx, cam);
+    G.drawTerrain(ctx, S, 'floor');
     G.drawGate(ctx, S);
     drawObstacles(ctx);
+    G.drawTerrain(ctx, S, 'air');
     drawFish(ctx);
     drawItems(ctx);
     drawOwner(ctx);
     drawPelican(ctx);
     G.drawPelicanAura(ctx, S);
+    G.drawGlideMeter(ctx, S);
     G.drawBrawl(ctx, S);
     G.fx.draw(ctx);
     speedLines(ctx);

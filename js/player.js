@@ -28,7 +28,7 @@
 
   function land(p) {
     const impact = -p.vy;
-    p.y = 0; p.vy = 0; p.ground = true; p.gliding = false;
+    p.y = 0; p.vy = 0; p.ground = true; p.gliding = false; p.justLanded = true;
     p.squash = Math.min(1, impact / 900);
     if (impact > 240) { G.Audio.play('land'); dust(impact > 700 ? 12 : 7, impact > 700); }
   }
@@ -48,10 +48,10 @@
     if (!p.ground) {
       p.holdT += dt;
       if (!p.cut && !p.hold && p.vy > C.CUT_V && p.holdT >= C.MIN_HOLD) { p.vy = C.CUT_V; p.cut = true; }
-      if (!p.gliding && play && p.hold && p.vy < 0 && p.glideT < C.GLIDE_MAX && !down && p.jumpBuf <= 0) {
+      if (!p.gliding && play && p.hold && p.vy < 0 && p.glideT < p.glideMax && !down && p.jumpBuf <= 0) {
         p.gliding = true; p.flap = 1; G.Audio.play('glide');
       }
-      if (p.gliding && (!p.hold || down || p.glideT >= C.GLIDE_MAX || !play)) p.gliding = false;
+      if (p.gliding && (!p.hold || down || p.glideT >= p.glideMax || !play)) p.gliding = false;
       let g = C.GRAV;
       if (p.gliding && p.vy < 0) { g *= C.GLIDE_G; p.glideT += dt; }
       else if (down) g *= C.FAST_G;
@@ -78,7 +78,7 @@
     if (p.blinkT < 0) { p.blinkT = G.rand(2, 4.5); p.blinkA = 0.16; }
     p.blinkA = Math.max(0, p.blinkA - dt);
     p.blink = p.blinkA > 0 ? Math.sin(Math.PI * (1 - p.blinkA / 0.16)) : 0;
-    const close = S.state === 'title' ? 0.1 : S.danger();
+    const close = S.idle() ? 0.1 : S.danger();
     p.look += ((1 - 2.6 * Math.min(1, close * 1.6)) - p.look) * (1 - Math.exp(-6 * dt));
     p.sweat = G.clamp((close - 0.35) * 1.8, 0, 1);
     p.dizzy = p.stumble > 0 || over ? 1 : 0;

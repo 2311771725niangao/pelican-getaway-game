@@ -54,7 +54,8 @@
   }
 
   function begin() {
-    if (S.ended() && S.overT < G.Screens.cardAt(S) + 0.6) return;
+    if (S.state === 'pick') { S.launch(S.pickSel); return; }
+    if (S.ended() && S.overT < G.Screens.cardAt(S) + 0.3) return;
     releaseAll(); S.start();
   }
   function pauseToggle() {
@@ -73,10 +74,14 @@
     wake();
     if (JUMP.has(c)) {
       if (S.state === 'title' || S.ended()) begin();
+      else if (S.state === 'pick') S.launch(S.pickSel);
       else if (S.state === 'pause') pauseToggle();
       else press('jump', c);
     } else if (DOWN.has(c)) press('down', c);
     else if (c === 'Enter') { if (S.state === 'pause') pauseToggle(); else if (S.state !== 'play') begin(); }
+    else if (S.state === 'pick' && (c === 'ArrowLeft' || c === 'KeyA')) S.pickSel = (S.pickSel + 2) % 3;
+    else if (S.state === 'pick' && (c === 'ArrowRight' || c === 'KeyD')) S.pickSel = (S.pickSel + 1) % 3;
+    else if (S.state === 'pick' && c >= 'Digit1' && c <= 'Digit3') S.launch(+c.slice(5) - 1);
     else if (c === 'KeyP' || c === 'Escape') pauseToggle();
     else if (c === 'KeyM') G.Audio.toggleMute();
   });
@@ -98,6 +103,7 @@
     const p = local(e), dx = p.x / lay.u, dy = p.y / lay.u;
     const b = G.Hud.buttons.find((q) => (q.w ? Math.abs(dx - q.x) <= q.w && Math.abs(dy - q.y) <= q.r + 6 : Math.hypot(dx - q.x, dy - q.y) <= q.r + 14));
     if (b) { if (b.id === 'mute') G.Audio.toggleMute(); else if (b.id === 'mode') { S.mode = S.mode === 'race' ? 'endless' : 'race'; G.Audio.play('click'); } else pauseToggle(); return; }
+    if (S.state === 'pick') { const hit = G.Hud.picks && G.Hud.picks.findIndex((q) => Math.abs(dx - q.x) <= q.w && Math.abs(dy - q.y) <= q.h); if (hit >= 0) S.launch(hit); return; }
     if (S.state === 'title' || S.ended()) { begin(); return; }
     if (S.state === 'pause') { pauseToggle(); return; }
     // 鼠标：左键跳、右键蜷缩；触屏：左侧 60% 跳、右侧 40% 蜷缩

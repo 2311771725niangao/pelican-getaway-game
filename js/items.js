@@ -13,8 +13,8 @@
 
   function spawnItem() {
     const p = S.p, pool = [['magnet', 2], ['plate', 1.6]];
-    if (!p.shield) pool.push(['shield', 2.6]);
-    if (S.rt > 22) pool.push(['bill', 2.4]);
+    if (!p.shield) pool.push(['shield', S.stage <= 1 ? 4.4 : 2.6]);
+    if (S.stage >= 1) pool.push(['bill', 2.4]);
     let r = Math.random() * pool.reduce((s, e) => s + e[1], 0), type = pool[0][0];
     for (const e of pool) { r -= e[1]; if (r <= 0) { type = e[0]; break; } }
     S.items.push({ type, x: S.W + 150, y: type === 'bill' ? 44 : 108, seed: Math.random() * 10, got: false });
@@ -85,6 +85,15 @@
       G.text(ctx, '¥', 0, 9, { size: 17, align: 'center', baseline: 'middle', color: '#c94a4a' });
     }
   }
+  G.drawPerkIcon = function (ctx, id, t) {
+    if (id === 'wing') {
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.moveTo(-26, 6); ctx.quadraticCurveTo(-14, -22, 0, -8); ctx.quadraticCurveTo(14, -22, 26, 6); ctx.quadraticCurveTo(12, -2, 0, 12); ctx.quadraticCurveTo(-12, -2, -26, 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (id === 'boost') {
+      ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.fillStyle = '#ffd23f';
+      ctx.beginPath(); ctx.moveTo(6, -24); ctx.lineTo(-14, 4); ctx.lineTo(-2, 4); ctx.lineTo(-8, 24); ctx.lineTo(16, -6); ctx.lineTo(2, -6); ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else icon(ctx, id, t);
+  };
   G.drawItem = function (ctx, it, t) {
     const bob = Math.sin(t * 4 + it.seed) * 4, d = DEF[it.type];
     ctx.save(); ctx.translate(it.x, GROUND - it.y - 20 + bob);

@@ -13,14 +13,14 @@
       // 车主到位后才开始打：先抓稳，再一顿拳脚
       S.beatT += dt;
       const total = S.result ? S.result.feathers : 0;
-      const target = G.clamp((S.beatT - 0.45) / 2.2, 0, 1) * total;
+      const target = G.clamp((S.beatT - 0.3) / 1.3, 0, 1) * total;
       while (S.featherOut < target) {
         S.featherOut++;
         fx.add({ x: x + G.rand(-40, 40), y: y + G.rand(-40, 10), vx: G.rand(-150, 150), vy: G.rand(-380, -120), g: 220, drag: 1.4, life: G.rand(1.6, 2.6), size: G.rand(4, 6.5), color: G.pick(['#ffffff', '#f4ecff', '#ffe6ee']), kind: 'feather', rot: G.rand(0, TAU), vr: G.rand(-6, 6) });
       }
       S.beatK = (S.beatK || 0) - dt;
-      if (S.beatT > 0.45 && S.beatT < 2.9 && S.beatK <= 0) {
-        S.beatK = G.rand(0.18, 0.3);
+      if (S.beatT > 0.3 && S.beatT < 1.9 && S.beatK <= 0) {
+        S.beatK = G.rand(0.14, 0.22);
         G.Audio.play('beat'); S.shake = Math.max(S.shake, 0.22);
         fx.text(x + G.rand(-60, 60), y - G.rand(30, 90), Cp.pick(Cp.BEAT), { size: G.rand(24, 34), color: G.pick(['#fff3b0', '#ff9fb2', '#ffffff']), life: 0.7 });
         fx.burst(x + G.rand(-30, 30), y + G.rand(-30, 20), 5, { s0: 80, s1: 240, g: 300, l0: 0.25, l1: 0.5, z0: 3, z1: 6, kind: 'star', colors: ['#ffe14a', '#fff', '#ff9f43'] });
@@ -41,7 +41,7 @@
 
   // 终点门：跨在路上的拱门，挂着渡轮时刻牌
   G.drawGate = function (ctx, S) {
-    if (S.mode !== 'race' || S.state === 'title') return;
+    if (S.mode !== 'race' || S.idle()) return;
     const x = S.px + (S.gateD - S.dist);
     if (x > S.W + 200 || x < -260) return;
     ctx.save(); ctx.translate(x, GROUND + 6);
@@ -62,9 +62,9 @@
 
   // 扭打烟尘团：盖在鹈鹕和车主之间，随时间旋转、冒星星
   G.drawBrawl = function (ctx, S) {
-    if (S.state !== 'over' || S.beatT < 0.35 || S.beatT > 3.3) return;
+    if (S.state !== 'over' || S.beatT < 0.25 || S.beatT > 2.1) return;
     const p = S.p, x = S.px + p.xoff - 20, y = GROUND - 60;
-    const a = G.clamp((S.beatT - 0.35) / 0.2, 0, 1) * G.clamp((3.3 - S.beatT) / 0.4, 0, 1);
+    const a = G.clamp((S.beatT - 0.25) / 0.15, 0, 1) * G.clamp((2.1 - S.beatT) / 0.3, 0, 1);
     ctx.save(); ctx.translate(x, y); ctx.globalAlpha = a * 0.92;
     for (let i = 0; i < 9; i++) {
       const ang = i * 0.7 + S.t * 4.5, r = 34 + 12 * Math.sin(S.t * 9 + i * 2), cx = Math.cos(ang) * r, cy = Math.sin(ang) * r * 0.75;

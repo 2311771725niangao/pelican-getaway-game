@@ -36,7 +36,7 @@
     ctx.restore();
     const sub = '鹈鹕降智测试 · 它能骑走这辆车吗？';
     G.text(ctx, sub, 0, 120, { size: G.fit(ctx, sub, 24, room), align: 'center', stroke: INK, strokeW: 5, shadow: 'rgba(30,10,50,.4)', shadowBlur: 8 });
-    const story = ['偷了车的鹈鹕，被分期还没还完的车主狂追。', '逃到海关码头就赢；被追上，挨揍掉毛！'];
+    const story = ['偷了车的鹈鹕，被分期还没还完的车主狂追。', '断桥要滑翔飞过去；逃到海关码头就赢！'];
     story.forEach((s, i) => G.text(ctx, s, 0, 152 + i * 22, { size: G.fit(ctx, s, 17, room), align: 'center', color: '#ffe9d6', stroke: INK, strokeW: 3.5 }));
     startButton(ctx, 0, 200 + ln, Math.min(340, room), 50, t, V.touch ? '点击屏幕　开始逃亡' : '点击 / 按空格　开始逃亡');
     const ctl = V.touch ? '点左侧：跳跃（长按滑翔）　点右侧：蜷缩' : '跳跃：空格 / ↑ / 点击（长按滑翔）　蜷缩：↓ / 右键 / 触屏点右侧';
@@ -64,6 +64,46 @@
     }
   }
 
+  // 开局三选一：三张道具卡，点一张即开跑
+  function pick(ctx, S, V) {
+    G.Hud.picks = [];
+    const cx = (V.w + V.il - V.ir) / 2, room = V.w - 24 - V.il - V.ir, narrow = room < 520;
+    const a = G.smooth(S.pickT / 0.3), n = S.perks.length;
+    ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = 'rgba(24,10,44,.5)'; ctx.fillRect(0, 0, V.w, V.h); ctx.restore();
+    const cw = narrow ? room : Math.min(200, (room - 24) / 3), ch = narrow ? 72 : 176, gap = 12;
+    const total = narrow ? n * ch + (n - 1) * gap : n * cw + (n - 1) * gap, head = 62;
+    const y0 = Math.max(V.it + 10, (V.h - V.deck - (head + total * (narrow ? 1 : 0) + (narrow ? 0 : ch))) / 2);
+    ctx.save(); ctx.globalAlpha = a;
+    G.text(ctx, '带一件上路', cx, y0 + 22, { size: G.fit(ctx, '带一件上路', 38, room), align: 'center', baseline: 'middle', color: '#fff3b0', stroke: INK, strokeW: 8 });
+    G.text(ctx, V.touch ? '点一张卡，直接开跑' : '点一张卡 / 按 1 2 3 / 空格选中项', cx, y0 + 52, { size: G.fit(ctx, '点一张卡 / 按 1 2 3 / 空格选中项', 15, room), align: 'center', baseline: 'middle', color: '#ffe9d6', stroke: INK, strokeW: 3.5 });
+    S.perks.forEach((pk, i) => {
+      const sel = i === S.pickSel;
+      const x = narrow ? cx - cw / 2 : cx - total / 2 + i * (cw + gap), y = y0 + head + 8 + (narrow ? i * (ch + gap) : 0);
+      const h = ch, k = sel ? 1.03 : 1;
+      ctx.save(); ctx.translate(x + cw / 2, y + h / 2); ctx.scale(k, k); ctx.translate(-cw / 2, -h / 2);
+      ctx.fillStyle = sel ? 'rgba(80,40,120,.95)' : 'rgba(38,20,68,.88)'; G.roundRect(ctx, 0, 0, cw, h, 18); ctx.fill();
+      ctx.strokeStyle = sel ? '#ffd23f' : 'rgba(255,255,255,.3)'; ctx.lineWidth = sel ? 3.5 : 2; ctx.stroke();
+      const ix = narrow ? 38 : cw / 2, iy = narrow ? h / 2 : 46;
+      ctx.save(); ctx.translate(ix, iy); ctx.scale(narrow ? 0.9 : 1.15, narrow ? 0.9 : 1.15);
+      G.drawPerkIcon(ctx, pk.id, S.t);
+      ctx.restore();
+      const tx = narrow ? 76 : cw / 2, al = narrow ? 'left' : 'center', tw = narrow ? cw - 90 : cw - 20;
+      G.text(ctx, (narrow ? '' : (i + 1) + '　') + pk.name, tx, narrow ? 24 : 98, { size: G.fit(ctx, pk.name, 19, tw), align: al, baseline: 'middle', color: '#fff3b0' });
+      const lines = wrapText(ctx, pk.sub, 14, tw);
+      lines.forEach((ln, j) => G.text(ctx, ln, tx, (narrow ? 46 : 124) + j * 19, { size: 14, align: al, baseline: 'middle', color: '#e6d8ff' }));
+      ctx.restore();
+      G.Hud.picks.push({ x: x + cw / 2, y: y + h / 2, w: cw / 2, h: h / 2 });
+    });
+    ctx.restore();
+  }
+  function wrapText(ctx, str, size, maxW) {
+    ctx.save(); ctx.font = '800 ' + size + 'px ' + G.FONT;
+    const out = []; let cur = '';
+    for (const ch of str) { if (ctx.measureText(cur + ch).width > maxW && cur) { out.push(cur); cur = ch; } else cur += ch; }
+    if (cur) out.push(cur);
+    ctx.restore(); return out.slice(0, 3);
+  }
+
   function pause(ctx, S, V) {
     ctx.save(); ctx.fillStyle = 'rgba(24,10,44,.55)'; ctx.fillRect(0, 0, V.w, V.h); ctx.restore();
     const cx = (V.w + V.il - V.ir) / 2, cy = V.stacked ? (V.it + V.band) / 2 + 20 : V.h / 2, room = V.w - 32 - V.il - V.ir;
@@ -72,8 +112,8 @@
     G.text(ctx, hint, cx, cy + 38, { size: G.fit(ctx, hint, 22, room), align: 'center', baseline: 'middle', stroke: INK, strokeW: 4 });
   }
 
-  // 结果卡：为截图设计——一屏放下称号、分数、评审官判定、逃亡编号
-  Sc.cardAt = (S) => (S.state === 'win' ? 1.8 : 1.4);
+  // 结果卡：一屏放下称号、分数、评审官判定、逃亡编号
+  Sc.cardAt = (S) => (S.state === 'win' ? 1.6 : 1.0);
   function result(ctx, S, V) {
     const R = S.result; if (!R) return;
     const at = Sc.cardAt(S), a = G.smooth((S.overT - at) / 0.45); if (a <= 0) return;
@@ -110,17 +150,17 @@
     });
     ctx.save(); ctx.globalAlpha *= 0.14; ctx.fillStyle = '#fff'; ctx.fillRect(pad, 356, textW, 1.5); ctx.restore();
     G.text(ctx, R.cap, cx, 380, { size: G.fit(ctx, R.cap, 14, textW, 700), align: 'center', baseline: 'middle', color: '#ffe9d6', weight: 700 });
-    G.text(ctx, '逃亡编号 #' + R.code, cx, 406, { size: 15, align: 'center', baseline: 'middle', color: '#ffd23f' });
+    G.text(ctx, '逃亡编号 #' + R.code, cx, 406, { size: 13, align: 'center', baseline: 'middle', color: '#b9a3e8' });
     if (S.overT > at + 0.6) {
       const p = 0.5 + 0.5 * Math.sin(S.t * 4.2), msg = V.touch ? '点击屏幕　再逃一次' : '空格 / 点击　再逃一次';
-      G.text(ctx, '截图发评论区，比比谁的编号更强', cx, h + 26, { size: G.fit(ctx, '截图发评论区，比比谁的编号更强', 16, w), align: 'center', baseline: 'middle', stroke: INK, strokeW: 4, color: '#fff3b0' });
-      G.text(ctx, msg, cx, h + 54, { size: 20, align: 'center', baseline: 'middle', stroke: INK, strokeW: 4.5, alpha: 0.7 + 0.3 * p });
+      G.text(ctx, msg, cx, h + 34, { size: 20, align: 'center', baseline: 'middle', stroke: INK, strokeW: 4.5, alpha: 0.7 + 0.3 * p });
     }
     ctx.restore();
   }
 
   Sc.draw = function (ctx, S, V) {
     if (S.state === 'title') title(ctx, S, V);
+    else if (S.state === 'pick') pick(ctx, S, V);
     else if (S.state === 'pause') pause(ctx, S, V);
     else if (S.state === 'over' || S.state === 'win') result(ctx, S, V);
   };

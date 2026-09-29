@@ -53,7 +53,7 @@
     if (O.bubble) { O.bubble.t += dt; if (O.bubble.t > O.bubble.life) O.bubble = null; }
     O.lamp = G.clamp((S.todVis - 0.35) / 0.3, 0, 1);
 
-    if (S.state === 'title') {
+    if (S.idle()) {
       S.gap = 270;
       O.shoutT -= dt;
       if (O.shoutT <= 0) { S.say(G.pick(SHOUTS)); O.shoutT = G.rand(3.2, 5); }
@@ -66,6 +66,7 @@
 
       let pr = (C.P0 + C.P1 * (1 - Math.exp(-S.rt / C.PTAU))) * C.TIER_MULT[O.tier];
       const sprint = S.mode === 'race' && S.meters > C.FINISH_M - C.SPRINT_M;
+      if (S.mode === 'race' && S.stage === 0) pr *= 0.8;
       if (sprint) {
         pr *= 1.3;
         if (!S.sprinted) { S.sprinted = true; S.showBanner('最后 ' + C.SPRINT_M + ' 米！', '车主发狂了，冲啊！', 2.6); S.say('今天必须抓到你！', 2.2); }

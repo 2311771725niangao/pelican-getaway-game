@@ -82,15 +82,17 @@
     ctx.globalAlpha = 0.45; ctx.fillStyle = '#2a1748'; G.roundRect(ctx, bx, by - 6, bw, 12, 6); ctx.fill(); ctx.globalAlpha = 1;
     if (race) {
       ctx.fillStyle = '#ffd23f'; G.roundRect(ctx, bx, by - 6, Math.max(12, bw * d), 12, 6); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.55)'; C.STAGE_AT.slice(1).forEach((m) => ctx.fillRect(bx + bw * (m / C.FINISH_M) - 1, by - 8, 2, 16));
       ctx.fillStyle = '#fff'; ctx.fillRect(bx + bw - 3, by - 14, 3, 28); ctx.fillStyle = '#ff5a6e'; ctx.beginPath(); ctx.moveTo(bx + bw, by - 14); ctx.lineTo(bx + bw + 14, by - 9); ctx.lineTo(bx + bw, by - 4); ctx.fill();
       const mx = bx + 6 + (bw - 12) * d;
       ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.arc(mx, by, 10, 0, TAU); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#ffb347'; ctx.beginPath(); ctx.moveTo(mx + 6, by - 1); ctx.lineTo(mx + 16, by + 2); ctx.lineTo(mx + 6, by + 6); ctx.fill(); ctx.stroke();
-      const lab = '海关码头 ' + Math.max(0, C.FINISH_M - Math.floor(S.meters)) + ' 米';
+      const lab = G.Copy.STAGES[S.stage].name.split(' · ')[1] + ' · 距码头 ' + Math.max(0, C.FINISH_M - Math.floor(S.meters)) + ' 米';
       G.text(ctx, lab, cx, by + 26, { size: G.fit(ctx, lab, 13, V.w - 24), align: 'center', color: '#fff3b0', stroke: INK, strokeW: 3.2 });
     } else G.text(ctx, '无尽模式 · ' + Math.floor(S.meters) + ' 米', cx, by + 4, { size: 13, align: 'center', color: '#fff3b0', stroke: INK, strokeW: 3.2 });
     // 道具
     const p = S.p, chips = [];
+    if (S.mult > 1) chips.push(['倍率 ×' + S.mult.toFixed(1), '#ffd23f', S.multT / 7]);
     if (p.shield) chips.push(['泡泡盾', '#8fd8ff', 1]);
     if (p.magnet > 0) chips.push(['磁铁 ' + Math.ceil(p.magnet) + 's', '#ff8fa3', p.magnet / 8]);
     if (p.plate > 0) chips.push(['假车牌 ' + Math.ceil(p.plate) + 's', '#ffe27d', p.plate / 6]);
