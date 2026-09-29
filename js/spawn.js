@@ -76,6 +76,12 @@
     return 350;
   }
 
+  // 喘息带：一长串鱼、没有障碍，玩家可以稳住节奏、拉开距离
+  function breather(b) {
+    line(b + 20, 28, 9, 44); line(b + 20 + 9 * 44 + 30, 92, 5, 44);
+    return 9 * 44 + 30 + 5 * 44 + 80;
+  }
+
   const KINDS = [
     { w: 4, min: 0, fn: single }, { w: 2, min: 0, fn: fishLine }, { w: 1.6, min: 10, fn: sky },
     { w: 2.2, min: 22, fn: gull }, { w: 2, min: 32, fn: double }, { w: 1.6, min: 55, fn: combo },
@@ -85,10 +91,11 @@
   S.updateSpawn = function (dt) {
     S.nextSpawn -= S.speed * dt;
     S.goldT -= dt;
-    if (S.nextSpawn > 0 || S.rt < 1.4) return;
+    if (S.nextSpawn > 0 || S.rt < 1.4 || S.meters > S.finishM() - 22) return;
     const base = spawnX() + S.nextSpawn;
     let len, fn;
-    if (S.goldT <= 0 && S.rt > 18) { fn = golden; S.goldT = G.rand(32, 46); }
+    if (S.meters >= S.restM && S.mode === 'race') { fn = breather; S.restM += 200; }
+    else if (S.goldT <= 0 && S.rt > 18) { fn = golden; S.goldT = G.rand(26, 36); }
     else {
       const pool = KINDS.filter((k) => S.rt >= k.min && k.fn !== last);
       let r = Math.random() * pool.reduce((s, k) => s + k.w, 0);
@@ -97,7 +104,7 @@
     }
     len = fn(base);
     last = fn === fishLine || fn === sky ? fn : null;
-    const space = G.lerp(1.1, 0.72, G.clamp(S.rt / 150, 0, 1)) * G.rand(0.9, 1.15);
+    const space = G.lerp(1.05, 0.62, G.clamp(S.rt / 90, 0, 1)) * G.rand(0.9, 1.15);
     S.nextSpawn += len + S.speed * (fn === fishLine || fn === sky ? space * 0.45 : space);
   };
 })();

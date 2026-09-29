@@ -73,10 +73,43 @@
     }
   }
 
+  // 逃亡进度：鹈鹕从左往右奔向海关码头；下面一排是身上带的道具
+  function progress(ctx, S, V) {
+    const two = V.two, by = two ? V.it + 114 + 66 : V.it + 30 + 62;
+    const bw = two ? Math.min(420, V.w - 28 - V.il - V.ir) : G.clamp(V.w * 0.34, 250, 420), cx = two ? (V.w + V.il - V.ir) / 2 : V.w / 2, bx = cx - bw / 2;
+    const race = S.mode === 'race', d = race ? G.clamp(S.meters / C.FINISH_M, 0, 1) : 0;
+    ctx.save();
+    ctx.globalAlpha = 0.45; ctx.fillStyle = '#2a1748'; G.roundRect(ctx, bx, by - 6, bw, 12, 6); ctx.fill(); ctx.globalAlpha = 1;
+    if (race) {
+      ctx.fillStyle = '#ffd23f'; G.roundRect(ctx, bx, by - 6, Math.max(12, bw * d), 12, 6); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillRect(bx + bw - 3, by - 14, 3, 28); ctx.fillStyle = '#ff5a6e'; ctx.beginPath(); ctx.moveTo(bx + bw, by - 14); ctx.lineTo(bx + bw + 14, by - 9); ctx.lineTo(bx + bw, by - 4); ctx.fill();
+      const mx = bx + 6 + (bw - 12) * d;
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.arc(mx, by, 10, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffb347'; ctx.beginPath(); ctx.moveTo(mx + 6, by - 1); ctx.lineTo(mx + 16, by + 2); ctx.lineTo(mx + 6, by + 6); ctx.fill(); ctx.stroke();
+      const lab = '海关码头 ' + Math.max(0, C.FINISH_M - Math.floor(S.meters)) + ' 米';
+      G.text(ctx, lab, cx, by + 26, { size: G.fit(ctx, lab, 13, V.w - 24), align: 'center', color: '#fff3b0', stroke: INK, strokeW: 3.2 });
+    } else G.text(ctx, '无尽模式 · ' + Math.floor(S.meters) + ' 米', cx, by + 4, { size: 13, align: 'center', color: '#fff3b0', stroke: INK, strokeW: 3.2 });
+    // 道具
+    const p = S.p, chips = [];
+    if (p.shield) chips.push(['泡泡盾', '#8fd8ff', 1]);
+    if (p.magnet > 0) chips.push(['磁铁 ' + Math.ceil(p.magnet) + 's', '#ff8fa3', p.magnet / 8]);
+    if (p.plate > 0) chips.push(['假车牌 ' + Math.ceil(p.plate) + 's', '#ffe27d', p.plate / 6]);
+    if (chips.length) {
+      const cw = 96, gap = 8, total = chips.length * cw + (chips.length - 1) * gap;
+      chips.forEach((c, i) => {
+        const x = cx - total / 2 + i * (cw + gap), y = by + (race ? 40 : 22);
+        ctx.globalAlpha = 0.55; ctx.fillStyle = '#2a1748'; G.roundRect(ctx, x, y, cw, 24, 12); ctx.fill();
+        ctx.globalAlpha = 1; ctx.fillStyle = c[1]; G.roundRect(ctx, x, y, Math.max(24, cw * c[2]), 24, 12); ctx.globalAlpha = 0.55; ctx.fill(); ctx.globalAlpha = 1;
+        G.text(ctx, c[0], x + cw / 2, y + 12.5, { size: 12.5, align: 'center', baseline: 'middle', color: '#fff', stroke: INK, strokeW: 3 });
+      });
+    }
+    ctx.restore();
+  }
+
   function banner(ctx, S, V) {
     const b = S.banner; if (!b) return;
     const inn = G.outBack(Math.min(1, b.t / 0.35)), out = G.clamp((b.life - b.t) / 0.4, 0, 1);
-    const y = V.two ? V.it + 210 : Math.max(150, V.it + 150), maxW = V.w - 24 - V.il - V.ir;
+    const y = V.two ? V.it + 300 : Math.max(180, V.it + 210), maxW = V.w - 24 - V.il - V.ir;
     ctx.save(); ctx.globalAlpha = out; ctx.translate((V.w + V.il - V.ir) / 2, y); ctx.scale(inn, inn);
     G.text(ctx, b.text, 0, 0, { size: G.fit(ctx, b.text, 34, maxW), align: 'center', baseline: 'middle', color: '#fff3b0', stroke: INK, strokeW: 7, shadow: 'rgba(0,0,0,.3)', shadowBlur: 12, shadowY: 3 });
     if (b.sub) G.text(ctx, b.sub, 0, 36, { size: G.fit(ctx, b.sub, 18, maxW), align: 'center', baseline: 'middle', stroke: INK, strokeW: 4 });
@@ -109,7 +142,7 @@
 
   function buttons(ctx, S, V) {
     const play = S.state === 'play' || S.state === 'pause', y = V.it + 34, x0 = V.w - V.ir - 34;
-    if (S.state !== 'over') {
+    if (!S.ended()) {
       const m = { id: 'mute', x: x0 - (play ? 50 : 0), y, r: 22 };
       Hud.buttons.push(m); round(ctx, m);
       ctx.save(); ctx.translate(m.x, m.y); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.lineCap = 'round';
@@ -174,7 +207,7 @@
       deck: lay.deck / u, touch: lay.touch, wide: lay.wide, two: lay.w < 660,
     };
     ctx.save(); ctx.scale(u, u);
-    if (S.state === 'play' || S.state === 'pause') { stats(ctx, S, V); chaseBar(ctx, S, V); }
+    if (S.state === 'play' || S.state === 'pause') { stats(ctx, S, V); chaseBar(ctx, S, V); progress(ctx, S, V); }
     banner(ctx, S, V); bubble(ctx, S, V); buttons(ctx, S, V); pads(ctx, S, V); hints(ctx, S, V);
     if (G.Screens) G.Screens.draw(ctx, S, V);
     ctx.restore();

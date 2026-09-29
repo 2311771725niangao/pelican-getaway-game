@@ -2,10 +2,10 @@
 (function () {
   const G = window.G, S = G.Game, C = S.C;
 
-  const SHOUTS = ['还我自行车！', '站住！那是我的车！', '鹈鹕！你给我停下！', '分期还没付完呢！', '你有翅膀还偷车？！', '我要报警了！', '车筐里有我的午饭！'];
+  const SHOUTS = G.Copy.SHOUTS;
   const SWAP = [null,
-    { text: '扫码解锁共享滑板车…', done: '车主换乘：共享电动滑板车！', mode: 'scooter', line: '这下追得上了！' },
-    { text: '借邻居的小电驴…', done: '车主换乘：小电驴！', mode: 'moped', line: '油门拧到底！' }];
+    { text: G.Copy.SWAP_TEXT[0], done: '车主换乘：共享电动滑板车！', mode: 'scooter', line: '这下追得上了！' },
+    { text: G.Copy.SWAP_TEXT[1], done: '车主换乘：小电驴！', mode: 'moped', line: '油门拧到底！' }];
 
   S.heart = 0; S.heartT = 0; S.flashCol = '#ff5a6e';
 
@@ -41,7 +41,9 @@
     const arrive = G.clamp((S.gapVis - C.GAP_CATCH) / 40, 0, 1);
     const footish = O.mode === 'foot' || O.swapT > 0;
 
-    if (S.state === 'over' && footish && arrive < 0.05) {
+    if (S.state === 'win') {
+      O.run += dt * 3;
+    } else if (S.state === 'over' && footish && arrive < 0.05) {
       const target = Math.round(O.run / Math.PI) * Math.PI;
       O.run += (target - O.run) * (1 - Math.exp(-8 * dt));
     } else {
@@ -63,6 +65,12 @@
       if (O.swapT > 0) { O.swapT -= dt; if (O.swapT <= 0) finishSwap(O); }
 
       let pr = (C.P0 + C.P1 * (1 - Math.exp(-S.rt / C.PTAU))) * C.TIER_MULT[O.tier];
+      const sprint = S.mode === 'race' && S.meters > C.FINISH_M - C.SPRINT_M;
+      if (sprint) {
+        pr *= 1.3;
+        if (!S.sprinted) { S.sprinted = true; S.showBanner('最后 ' + C.SPRINT_M + ' 米！', '车主发狂了，冲啊！', 2.6); S.say('今天必须抓到你！', 2.2); }
+      }
+      if (p.plate > 0) pr *= 0.3;
       if (O.swapT > 0) pr = -55;
       if (p.tuckHold > 0.5) pr += 12;
       if (p.turbo > 0) pr = -C.TURBO_GAIN;
@@ -79,6 +87,8 @@
         if (S.heartT <= 0) { S.heartT = G.lerp(0.9, 0.5, dg); S.heart = 1; G.Audio.play('heart'); }
       }
       if (S.gap <= C.GAP_CATCH) S.gameOver();
+    } else if (S.state === 'win') {
+      S.gap = Math.min(C.GAP_MAX + 200, S.gap + 140 * dt);
     }
     S.heart = Math.max(0, S.heart - dt * 3);
     S.gapVis += (S.gap - S.gapVis) * (1 - Math.exp(-7 * dt));

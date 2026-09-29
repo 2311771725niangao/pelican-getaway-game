@@ -39,6 +39,10 @@
     }
   }
 
+  function drawItems(ctx) {
+    for (const it of S.items) if (it.x > -40 && it.x < S.W + 40) G.drawItem(ctx, it, S.t);
+  }
+
   function drawOwner(ctx) {
     const O = S.owner, x = S.ownerX(), gy = GROUND + 5, mode = O.swapT > 0 ? 'foot' : O.mode;
     shadow(ctx, x + 6, gy + 2, mode === 'foot' ? 34 : 52, 6, 0.3);
@@ -95,10 +99,14 @@
     ctx.translate(0, lay.oy);
     G.Scene.drawBack(ctx, cam);
     G.Scene.drawRoad(ctx, cam);
+    G.drawGate(ctx, S);
     drawObstacles(ctx);
     drawFish(ctx);
+    drawItems(ctx);
     drawOwner(ctx);
     drawPelican(ctx);
+    G.drawPelicanAura(ctx, S);
+    G.drawBrawl(ctx, S);
     G.fx.draw(ctx);
     speedLines(ctx);
     ctx.restore();

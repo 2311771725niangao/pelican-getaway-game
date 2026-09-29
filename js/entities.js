@@ -26,10 +26,11 @@
       S.flash = 0.35; S.flashCol = '#ffe08a';
       fx.burst(x, y, 26, { s0: 120, s1: 380, g: 0, l0: 0.5, l1: 1, z0: 4, z1: 9, kind: 'star', colors: ['#fff3b0', '#ffd23f', '#ffffff'], drag: 2 });
       fx.burst(x, y, 1, { s0: 0, s1: 1, g: 0, l0: 0.7, l1: 0.7, z0: 14, z1: 14, kind: 'ring', color: '#ffe08a' });
-      S.say(G.pick(['那是金鱼？！', '它开挂了！']));
+      S.say(G.pick(G.Copy.GOLD));
       return;
     }
     S.fishCount++; S.combo++; S.comboT = 1.1;
+    if (S.combo > S.run.combo) S.run.combo = S.combo;
     S.gapGain += C.FISH_GAIN;
     p.fishVis = Math.min(10, p.fishVis + 0.6);
     G.Audio.play('fish', S.combo);
@@ -64,6 +65,10 @@
     for (let i = S.fish.length - 1; i >= 0; i--) {
       const f = S.fish[i];
       f.x -= v * dt;
+      if (play && p.magnet > 0 && !f.golden) {
+        const mx = cx - f.x, my = cy - f.y, md = Math.sqrt(mx * mx + my * my);
+        if (md < 300 && md > 1) { const pull = Math.min(md, 900 * dt); f.x += (mx / md) * pull; f.y += (my / md) * pull; }
+      }
       if (f.x < -80 || f.got) { S.fish.splice(i, 1); continue; }
       if (play) {
         const dx = f.x - cx, dy = f.y - cy;

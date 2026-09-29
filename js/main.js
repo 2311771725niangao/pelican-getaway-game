@@ -54,7 +54,7 @@
   }
 
   function begin() {
-    if (S.state === 'over' && S.overT < 0.8) return;
+    if (S.ended() && S.overT < G.Screens.cardAt(S) + 0.6) return;
     releaseAll(); S.start();
   }
   function pauseToggle() {
@@ -72,7 +72,7 @@
     if (e.repeat) return;
     wake();
     if (JUMP.has(c)) {
-      if (S.state === 'title' || S.state === 'over') begin();
+      if (S.state === 'title' || S.ended()) begin();
       else if (S.state === 'pause') pauseToggle();
       else press('jump', c);
     } else if (DOWN.has(c)) press('down', c);
@@ -96,9 +96,9 @@
     const isTouch = e.pointerType === 'touch' || e.pointerType === 'pen';
     if (isTouch !== touch && (e.pointerType === 'touch' || e.pointerType === 'mouse')) { touch = isTouch; layout(); }
     const p = local(e), dx = p.x / lay.u, dy = p.y / lay.u;
-    const b = G.Hud.buttons.find((q) => Math.hypot(dx - q.x, dy - q.y) <= q.r + 14);
-    if (b) { if (b.id === 'mute') G.Audio.toggleMute(); else pauseToggle(); return; }
-    if (S.state === 'title' || S.state === 'over') { begin(); return; }
+    const b = G.Hud.buttons.find((q) => (q.w ? Math.abs(dx - q.x) <= q.w && Math.abs(dy - q.y) <= q.r + 6 : Math.hypot(dx - q.x, dy - q.y) <= q.r + 14));
+    if (b) { if (b.id === 'mute') G.Audio.toggleMute(); else if (b.id === 'mode') { S.mode = S.mode === 'race' ? 'endless' : 'race'; G.Audio.play('click'); } else pauseToggle(); return; }
+    if (S.state === 'title' || S.ended()) { begin(); return; }
     if (S.state === 'pause') { pauseToggle(); return; }
     // 鼠标：左键跳、右键蜷缩；触屏：左侧 60% 跳、右侧 40% 蜷缩
     const kind = (e.pointerType === 'mouse' ? e.button === 2 : p.x > lay.W * 0.6) ? 'down' : 'jump';

@@ -109,6 +109,8 @@
     tier() { [0, 1, 0, 1].forEach((k, i) => tone({ f: k ? 880 : 660, dur: 0.12, type: 'square', vol: 0.08, at: i * 0.13 })); },
     caught() { [62, 61, 60, 55].forEach((m, i) => tone({ f: NOTE(m), dur: i === 3 ? 0.7 : 0.28, type: 'sawtooth', vol: 0.10, at: i * 0.32 })); },
     start() { [60, 64, 67].forEach((m, i) => tone({ f: NOTE(m + 12), dur: 0.12, type: 'triangle', vol: 0.13, at: i * 0.08 })); },
+    win() { [60, 64, 67, 72, 76, 79, 84].forEach((m, i) => tone({ f: NOTE(m + 12), dur: i === 6 ? 0.8 : 0.16, type: 'triangle', vol: 0.13, at: i * 0.09 })); },
+    beat() { noise({ dur: 0.1, vol: 0.2, freq: 700, to: 200, q: 0.8 }); tone({ f: 200, to: 90, dur: 0.1, type: 'square', vol: 0.08 }); },
     click() { tone({ f: 660, dur: 0.05, type: 'square', vol: 0.05 }); },
     heart() { tone({ f: 70, to: 45, dur: 0.12, type: 'sine', vol: 0.25 }); tone({ f: 70, to: 45, dur: 0.12, type: 'sine', vol: 0.18, at: 0.16 }); },
   };

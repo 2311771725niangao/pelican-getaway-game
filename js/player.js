@@ -92,6 +92,8 @@
 
   S.hitPelican = function (ob) {
     const p = S.p;
+    if (p.shield) { S.popShield(); if (ob) S.knock(ob); return; }
+    S.run.hits++;
     p.stumble = 0.55; p.invuln = 1.5; p.fishVis = Math.max(0, p.fishVis - 3);
     S.gap = Math.max(0, S.gap - C.HIT); S.gapGain = Math.min(S.gapGain, 0);
     S.shake = 0.45; S.flash = 0.4; S.flashCol = '#ff5a6e'; S.combo = 0;
@@ -101,6 +103,6 @@
     fx.burst(x, y, 8, { s0: 60, s1: 200, g: 300, l0: 0.3, l1: 0.6, z0: 2, z1: 4, kind: 'star', colors: ['#ffe14a', '#fff'] });
     fx.text(x, y - 40, '哎哟！', { size: 26, color: '#ff8fa3' });
     if (ob) S.knock(ob);
-    S.say(G.pick(['活该！', '看你往哪跑！', '差点就抓到了！']));
+    S.say(G.pick(G.Copy.HIT));
   };
 })();
