@@ -4,7 +4,9 @@
 
   S.pressJump = function () {
     if (S.state !== 'play') return;
-    const p = S.p; p.hold = true; p.jumpBuf = 0.12;
+    const p = S.p;
+    if (p.hold) return;
+    p.hold = true; p.jumpBuf = 0.16;
   };
   S.releaseJump = function () { S.p.hold = false; };
   S.setDown = function (on) { if (S.state === 'play' || !on) S.p.down = on; };
@@ -26,9 +28,17 @@
     G.Audio.play('jump'); dust(6, false);
   }
 
+  function airJump(p) {
+    p.airJump = false; p.vy = C.AIR_JUMP_V; p.jumpBuf = 0; p.coyote = 0;
+    p.holdT = 0; p.cut = false; p.gliding = false; p.flap = 1; p.squash = -0.35;
+    p.glideT = Math.max(0, p.glideT - C.AIR_GLIDE_GAIN);
+    G.Audio.play('airJump');
+    fx.burst(S.px + p.xoff, GROUND - p.y - 40, 8, { s0: 40, s1: 140, g: 100, l0: 0.25, l1: 0.4, z0: 2, z1: 4, kind: 'feather', color: '#fff3b0' });
+  }
+
   function land(p) {
     const impact = -p.vy;
-    p.y = 0; p.vy = 0; p.ground = true; p.gliding = false; p.justLanded = true;
+    p.y = 0; p.vy = 0; p.ground = true; p.gliding = false; p.justLanded = true; p.airJump = true;
     p.squash = Math.min(1, impact / 900);
     if (impact > 240) { G.Audio.play('land'); dust(impact > 700 ? 12 : 7, impact > 700); }
   }
@@ -43,20 +53,25 @@
     p.flap = Math.max(0, p.flap - 3.5 * dt);
     p.squash += (0 - p.squash) * (1 - Math.exp(-14 * dt));
 
-    if (play && p.jumpBuf > 0 && (p.ground || p.coyote > 0)) jump(p);
+    if (play && p.jumpBuf > 0) {
+      if (p.ground || p.coyote > 0) jump(p);
+      else if (p.airJump) airJump(p);
+    }
 
     if (!p.ground) {
       p.holdT += dt;
       if (!p.cut && !p.hold && p.vy > C.CUT_V && p.holdT >= C.MIN_HOLD) { p.vy = C.CUT_V; p.cut = true; }
-      if (!p.gliding && play && p.hold && p.vy < 0 && p.glideT < p.glideMax && !down && p.jumpBuf <= 0) {
+      // 接近最高点就展开翅膀；蜷缩只收起身体，不再取消滑翔。
+      if (!p.gliding && play && p.hold && p.vy <= 80 && p.glideT < p.glideMax) {
         p.gliding = true; p.flap = 1; G.Audio.play('glide');
       }
-      if (p.gliding && (!p.hold || down || p.glideT >= p.glideMax || !play)) p.gliding = false;
+      if (p.gliding && (!p.hold || p.glideT >= p.glideMax || !play)) p.gliding = false;
+      const fast = down && !p.hold;
       let g = C.GRAV;
       if (p.gliding && p.vy < 0) { g *= C.GLIDE_G; p.glideT += dt; }
-      else if (down) g *= C.FAST_G;
+      else if (fast) g *= C.FAST_G;
       p.vy -= g * dt;
-      p.vy = Math.max(p.vy, p.gliding ? -C.GLIDE_FALL : down ? -C.FAST_V : -1300);
+      p.vy = Math.max(p.vy, p.gliding ? -C.GLIDE_FALL : fast ? -C.FAST_V : -1300);
       p.y += p.vy * dt;
       if (p.y <= 0) land(p);
     }

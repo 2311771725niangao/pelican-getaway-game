@@ -26,7 +26,7 @@
   function title(ctx, S, V) {
     const cx = (V.w + V.il - V.ir) / 2, t = S.t, narrow = V.w < 560, ln = 22, wins = S.wins > 0;
     const chipIn = V.stacked || narrow, room = V.w - 28 - V.il - V.ir;
-    const Hb = 262 + ln + (chipIn ? 38 : 0) + (wins ? 40 : 0);
+    const Hb = 284 + ln + (chipIn ? 38 : 0) + (wins ? 40 : 0);
     const T = V.stacked ? V.it + 14 : Math.max(V.it + 14, 58);
     const bs = G.clamp((V.band + 330 / V.u - 10 - T) / Hb, 0.7, 1);
     ctx.save(); ctx.translate(cx, T); ctx.scale(bs, bs);
@@ -34,16 +34,17 @@
     ctx.save(); ctx.translate(0, 40); ctx.rotate(Math.sin(t * 1.6) * 0.018); const k = 1 + Math.sin(t * 3.2) * 0.012; ctx.scale(k, k);
     G.text(ctx, '鹈鹕，别跑！', 0, 0, { size: G.fit(ctx, '鹈鹕，别跑！', 76, room - 24), align: 'center', baseline: 'middle', color: '#fff3b0', stroke: INK, strokeW: 12, shadow: 'rgba(30,10,50,.45)', shadowBlur: 18, shadowY: 6 });
     ctx.restore();
-    const sub = '鹈鹕降智测试 · 它能骑走这辆车吗？';
+    const sub = G.Copy.TITLE_SUB;
     G.text(ctx, sub, 0, 120, { size: G.fit(ctx, sub, 24, room), align: 'center', stroke: INK, strokeW: 5, shadow: 'rgba(30,10,50,.4)', shadowBlur: 8 });
     const story = ['偷了车的鹈鹕，被分期还没还完的车主狂追。', '断桥要滑翔飞过去；逃到海关码头就赢！'];
     story.forEach((s, i) => G.text(ctx, s, 0, 152 + i * 22, { size: G.fit(ctx, s, 17, room), align: 'center', color: '#ffe9d6', stroke: INK, strokeW: 3.5 }));
     startButton(ctx, 0, 200 + ln, Math.min(340, room), 50, t, V.touch ? '点击屏幕　开始逃亡' : '点击 / 按空格　开始逃亡');
-    const ctl = V.touch ? '点左侧：跳跃（长按滑翔）　点右侧：蜷缩' : '跳跃：空格 / ↑ / 点击（长按滑翔）　蜷缩：↓ / 右键 / 触屏点右侧';
+    const ctl = V.touch ? '左侧：跳跃 / 再点二段跳　右侧：蜷缩' : '跳跃：空格 / ↑ / 点击（再按二段跳）　蜷缩：↓ / 右键';
     const w = Math.min(600, room);
     pillBox(ctx, 0, 248 + ln, w, 28, 0.45);
     G.text(ctx, ctl, 0, 248 + ln, { size: G.fit(ctx, ctl, 15, w - 20), align: 'center', baseline: 'middle', color: '#fff', alpha: 0.95 });
-    let yy = 284 + ln;
+    G.text(ctx, '按住跳跃滑翔 · 蜷缩也能滑 · 落地恢复二段跳', 0, 272 + ln, { size: G.fit(ctx, '按住跳跃滑翔 · 蜷缩也能滑 · 落地恢复二段跳', 13, room), align: 'center', baseline: 'middle', color: '#ffe9c8', stroke: INK, strokeW: 2 });
+    let yy = 306 + ln;
     const rec = '最佳 ' + S.best + (S.wins ? ' · 已跑脱 ' + S.wins + ' 次' : '');
     if (S.best > 0 && chipIn) {
       pillBox(ctx, 0, yy, Math.min(room, 220), 30, 0.42);
@@ -138,13 +139,13 @@
     G.text(ctx, sub, cx, 162, { size: G.fit(ctx, sub, 16, w - 24), align: 'center', baseline: 'middle', color: win || S.newBest ? '#ffd23f' : '#d9c8ff' });
     // 评审官判定
     ctx.save(); ctx.globalAlpha *= 0.14; ctx.fillStyle = '#fff'; ctx.fillRect(pad, 178, textW, 1.5); ctx.restore();
-    G.text(ctx, '评审官判定', pad, 194, { size: 13, baseline: 'middle', color: '#b9a3e8' });
+    G.text(ctx, '评审官判定 · 滑翔表现', pad, 194, { size: 13, baseline: 'middle', color: '#b9a3e8' });
     R.checks.forEach((c, i) => {
       const yy = 218 + i * 26, on = S.overT > at + 0.3 + i * 0.12;
       G.text(ctx, on ? (c.pass ? '✓' : '✗') : '·', pad + 2, yy, { size: 18, baseline: 'middle', color: c.pass ? '#7be495' : '#ff8fa3' });
       G.text(ctx, c.name, pad + 24, yy, { size: 15, baseline: 'middle', color: '#fff' });
       if (on) {
-        const t = c.pass ? c.ok : c.no, mw = textW - 24 - 96;
+        const t = c.detail, mw = textW - 24 - 84;
         G.text(ctx, t, w - pad, yy, { size: G.fit(ctx, t, 13, mw, 600), align: 'right', baseline: 'middle', color: c.pass ? '#bff5cf' : '#ffc0cc', weight: 600 });
       }
     });

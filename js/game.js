@@ -13,8 +13,8 @@
     STAGE_AT: [0, 350, 700, 1050],     // 四个赛段的起点（米）
     WIN_BONUS: 1500, PAR_T: 130,
     HIT: 90, FISH_GAIN: 4, TURBO_T: 5, TURBO_GAIN: 36,
-    JUMP_V: 800, GRAV: 2400, CUT_V: 330, MIN_HOLD: 0.12,
-    GLIDE_G: 0.2, GLIDE_FALL: 150, GLIDE_MAX: 0.9, FAST_G: 2.4, FAST_V: 950,
+    JUMP_V: 800, AIR_JUMP_V: 640, GRAV: 2400, CUT_V: 330, MIN_HOLD: 0.12,
+    GLIDE_G: 0.2, GLIDE_FALL: 120, GLIDE_MAX: 1.35, AIR_GLIDE_GAIN: 0.4, FAST_G: 2.4, FAST_V: 950,
     PX_PER_M: 50, SC: 1.15,
   };
   const C = S.C;
@@ -47,7 +47,7 @@
   S.newRun = () => ({ hits: 0, shielded: 0, bills: 0, tuck: 0, combo: 0, items: 0, feathers: 0, win: false, near: 0, rings: 0, perfect: 0, falls: 0, glideFish: 0 });
 
   S.newPlayer = () => ({
-    y: 0, vy: 0, ground: true, hold: false, down: false, jumpBuf: 0, coyote: 0, holdT: 0, cut: false,
+    y: 0, vy: 0, ground: true, hold: false, down: false, jumpBuf: 0, coyote: 0, holdT: 0, cut: false, airJump: true,
     gliding: false, glideT: 0, glideMax: C.GLIDE_MAX, glide: 0, landed: null, tuck: 0, tuckHold: 0,
     wheel: 0, pedal: 0, squash: 0, xoff: 0, tilt: 0,
     stumble: 0, invuln: 0, turbo: 0, flap: 0, blink: 0, blinkT: 2, blinkA: 0,
@@ -117,7 +117,7 @@
     S.score = sc;
     S.newBest = sc > S.best;
     if (S.newBest) { S.best = sc; G.save('best', sc); }
-    const checks = Cp.CHECKS.map((c) => Object.assign({ pass: !!c.test(r) }, c));
+    const checks = Cp.CHECKS.map((c) => Object.assign({}, c, { pass: !!c.test(r), detail: c.detail(r) }));
     const n = checks.filter((c) => c.pass).length;
     let h = 2166136261;
     [sc, r.hits, Math.round(S.rt * 10), r.fish, win ? 1 : 0, r.feathers].forEach((v) => { h = Math.imul(h ^ (v | 0), 16777619) >>> 0; });

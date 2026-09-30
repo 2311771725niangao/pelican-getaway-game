@@ -97,12 +97,13 @@
     if (p.magnet > 0) chips.push(['磁铁 ' + Math.ceil(p.magnet) + 's', '#ff8fa3', p.magnet / 8]);
     if (p.plate > 0) chips.push(['假车牌 ' + Math.ceil(p.plate) + 's', '#ffe27d', p.plate / 6]);
     if (chips.length) {
-      const cw = 96, gap = 8, total = chips.length * cw + (chips.length - 1) * gap;
+      const gap = 8, room = V.w - 28 - V.il - V.ir;
+      const cw = Math.min(96, (room - (chips.length - 1) * gap) / chips.length), total = chips.length * cw + (chips.length - 1) * gap;
       chips.forEach((c, i) => {
         const x = cx - total / 2 + i * (cw + gap), y = by + (race ? 40 : 22);
         ctx.globalAlpha = 0.55; ctx.fillStyle = '#2a1748'; G.roundRect(ctx, x, y, cw, 24, 12); ctx.fill();
-        ctx.globalAlpha = 1; ctx.fillStyle = c[1]; G.roundRect(ctx, x, y, Math.max(24, cw * c[2]), 24, 12); ctx.globalAlpha = 0.55; ctx.fill(); ctx.globalAlpha = 1;
-        G.text(ctx, c[0], x + cw / 2, y + 12.5, { size: 12.5, align: 'center', baseline: 'middle', color: '#fff', stroke: INK, strokeW: 3 });
+        ctx.globalAlpha = 1; ctx.fillStyle = c[1]; G.roundRect(ctx, x, y, Math.max(24, cw * G.clamp(c[2], 0, 1)), 24, 12); ctx.globalAlpha = 0.55; ctx.fill(); ctx.globalAlpha = 1;
+        G.text(ctx, c[0], x + cw / 2, y + 12.5, { size: G.fit(ctx, c[0], 12.5, cw - 12), align: 'center', baseline: 'middle', color: '#fff', stroke: INK, strokeW: 3 });
       });
     }
     ctx.restore();
@@ -169,7 +170,7 @@
     const top = V.h - V.deck + 8, bot = V.h - V.ib - 10, split = V.w * 0.6, h = bot - top;
     if (h < 40) return;
     const defs = [
-      { x0: V.il + 12, x1: split - 5, on: G.Input.jump, main: '跳跃', sub: '长按滑翔', up: true },
+      { x0: V.il + 12, x1: split - 5, on: G.Input.jump, main: S.p.ground ? '跳跃' : S.p.airJump ? '再点二段跳' : '滑翔', sub: '长按滑翔', up: true },
       { x0: split + 5, x1: V.w - V.ir - 12, on: G.Input.down, main: '蜷缩', sub: '', up: false },
     ];
     defs.forEach((p) => {
@@ -192,7 +193,7 @@
     const a = G.clamp((4.5 - S.rt) / 0.7, 0, 1), y = V.h - V.ib - 34, split = V.w * 0.6;
     ctx.save(); ctx.globalAlpha = a * 0.55; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.setLineDash([6, 8]);
     ctx.beginPath(); ctx.moveTo(split, y - 34); ctx.lineTo(split, y + 34); ctx.stroke(); ctx.restore();
-    [['点左侧　跳跃（长按滑翔）', V.il, split], ['点右侧　蜷缩', split, V.w - V.ir]].forEach((h) => {
+    [['左侧：再点二段跳 · 长按滑翔', V.il, split], ['右侧：蜷缩', split, V.w - V.ir]].forEach((h) => {
       const cx = (h[1] + h[2]) / 2, room = h[2] - h[1] - 16, size = G.fit(ctx, h[0], 15, room - 24);
       ctx.save(); ctx.font = `800 ${size}px ${G.FONT}`; const w = Math.min(room, ctx.measureText(h[0]).width + 24); ctx.restore();
       ctx.save(); ctx.globalAlpha = a * 0.55; ctx.fillStyle = '#2a1748'; G.roundRect(ctx, cx - w / 2, y - 15, w, 30, 15); ctx.fill(); ctx.restore();

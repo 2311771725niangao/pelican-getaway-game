@@ -18,9 +18,9 @@
     const x = S.px + p.xoff + 10, y = WALK + 8;
     fx.burst(x, y, 18, { a0: Math.PI * 1.15, a1: Math.PI * 1.85, s0: 160, s1: 420, g: 900, l0: 0.5, l1: 0.9, z0: 3, z1: 6, kind: 'dot', color: '#bfe6ff' });
     G.Audio.play('land');
-    p.vy = 880; p.ground = false; p.y = Math.max(p.y, 4); p.coyote = 0; p.holdT = 0; p.cut = true; p.gliding = false; p.glideT = 0;
+    p.vy = 880; p.ground = false; p.y = Math.max(p.y, 4); p.coyote = 0; p.holdT = 0; p.cut = true; p.gliding = false; p.glideT = 0; p.airJump = false; p.jumpBuf = 0;
+    S.run.falls++;
     if (p.invuln <= 0) {
-      S.run.falls++;
       fx.text(x, GROUND - 120, '掉海里了！', { size: 26, color: '#9fd8ff' });
       S.hitPelican(null);
       S.say(G.pick(Cp.FALL));
@@ -83,7 +83,7 @@
       if (z.type === 'gap') {
         if (!z.warned && z.x < S.W + 60) {
           z.warned = true;
-          if (!S.seenHint.gap) { S.seenHint.gap = 1; S.showBanner('前方断桥！', '起跳后按住不放，滑翔飞过去', 2.6); }
+          if (!S.seenHint.gap) { S.seenHint.gap = 1; S.showBanner('前方断桥！', '长按滑翔；松开再按，二段跳补救', 3.5); }
           else S.showBanner('前方断桥！', '', 1.4);
         }
         if (p.y < 6 && p.vy <= 0 && cx > z.x + 18 && cx < z.x + z.w - 18) rescue(p, z);
@@ -250,6 +250,8 @@
     ctx.globalAlpha = 0.45; ctx.strokeStyle = '#2a1748'; ctx.lineWidth = 9; ctx.beginPath(); ctx.arc(0, 0, 74, 0, TAU); ctx.stroke();
     ctx.globalAlpha = 0.95; ctx.strokeStyle = left < 0.28 ? '#ff6f8f' : p.gliding ? '#ffe680' : '#ffffff'; ctx.lineWidth = 6;
     if (left > 0.01) { ctx.beginPath(); ctx.arc(0, 0, 74, -Math.PI / 2, -Math.PI / 2 + TAU * left); ctx.stroke(); }
+    const label = p.airJump ? '再按二段跳' : '二段跳已用';
+    G.text(ctx, label, 0, 98, { size: 16, align: 'center', baseline: 'middle', color: p.airJump ? '#fff3b0' : '#e2d6ee', stroke: INK, strokeW: 4 });
     ctx.restore();
   };
 })();

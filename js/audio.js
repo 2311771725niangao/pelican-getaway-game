@@ -89,6 +89,7 @@
 
   const S = {
     jump() { tone({ f: 340, to: 680, dur: 0.14, type: 'square', vol: 0.09 }); },
+    airJump() { tone({ f: 520, to: 1040, dur: 0.16, type: 'triangle', vol: 0.14 }); },
     glide() { noise({ dur: 0.24, vol: 0.10, freq: 900, to: 2400, q: 0.8 }); },
     land() { tone({ f: 140, to: 55, dur: 0.12, type: 'sine', vol: 0.22 }); noise({ dur: 0.06, vol: 0.05, freq: 1800, type: 'highpass' }); },
     tuck() { noise({ dur: 0.10, vol: 0.05, freq: 1300, to: 500, q: 1 }); },
