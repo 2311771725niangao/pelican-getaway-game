@@ -92,6 +92,7 @@
     if (S.state !== 'pick' || S.pickT < 0.25) return;
     const perk = S.perks[G.clamp(i, 0, S.perks.length - 1)], p = S.p;
     S.state = 'play';
+    S.gap = C.GAP0; S.gapVis = C.GAP0;
     if (perk.id === 'shield') p.shield = true;
     else if (perk.id === 'magnet') p.magnet = 20;
     else if (perk.id === 'wing') p.glideMax = C.GLIDE_MAX * 1.5;
