@@ -147,7 +147,7 @@
     const base = spawnX() + S.nextSpawn;
     let len, fn;
     if (!S.tutDone && S.mode === 'race' && S.meters > 110) { fn = tutorialGap; S.tutDone = true; }
-    else if (S.meters >= S.restM && S.mode === 'race') { fn = breather; S.restM += 260; }
+    else if (S.meters >= S.restM && S.mode === 'race') { fn = breather; S.restM += 220; }
     else if (S.goldT <= 0 && S.rt > 18) { fn = golden; S.goldT = G.rand(26, 36); }
     else {
       const pool = KINDS.filter((k) => S.rt >= (k.min || 0) && wOf(k) > 0 && k.fn !== last);
@@ -157,7 +157,7 @@
     }
     len = fn(base);
     last = fn === fishLine || fn === sky || fn === bridgeGap || fn === windGap ? fn : null;
-    const space = G.lerp(1.05, 0.6, G.clamp(S.rt / 130, 0, 1)) * G.rand(0.9, 1.15);
+    const space = G.lerp(1.05, 0.82, G.clamp(S.rt / 130, 0, 1)) * G.rand(0.9, 1.15);
     const terrain = fn === tutorialGap || fn === bridgeGap || fn === windGap || fn === kiteLine || fn === ringChain;
     S.nextSpawn += len + S.speed * (fn === fishLine || fn === sky ? space * 0.45 : terrain ? space * 0.85 : space);
   };

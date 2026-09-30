@@ -68,8 +68,8 @@
       const sprint = S.mode === 'race' && S.meters > C.FINISH_M - C.SPRINT_M;
       if (S.mode === 'race' && S.stage === 0) pr *= 0.8;
       if (sprint) {
-        pr *= 1.3;
-        if (!S.sprinted) { S.sprinted = true; S.showBanner('最后 ' + C.SPRINT_M + ' 米！', '车主发狂了，冲啊！', 2.6); S.say('今天必须抓到你！', 2.2); }
+        pr *= 1.12;
+        if (!S.sprinted) { S.sprinted = true; S.showBanner('最后 ' + C.SPRINT_M + ' 米！', '码头就在前面，冲啊！', 2.6); S.say('今天必须抓到你！', 2.2); }
       }
       if (p.plate > 0) pr *= 0.3;
       if (O.swapT > 0) pr = -55;

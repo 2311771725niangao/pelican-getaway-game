@@ -6,13 +6,13 @@
   S.C = {
     DAY: 200,                          // 从黄金时刻到暮色用时（秒）
     V0: 330, V1: 290, VTAU: 70,        // 世界速度：330 → 620 px/s
-    GAP0: 300, GAP_MAX: 480, GAP_CATCH: 64,
-    P0: 7, P1: 24, PTAU: 90,           // 车主每秒逼近多少
-    TIER_AT: [0, 52, 105], TIER_MULT: [1, 1.2, 1.45],
+    GAP0: 360, GAP_MAX: 560, GAP_CATCH: 64,
+    P0: 4, P1: 18, PTAU: 90,          // 后程逼近放缓，给普通玩家留下吃鱼补救的时间
+    TIER_AT: [0, 52, 105], TIER_MULT: [1, 1.15, 1.3],
     FINISH_M: 1400, SPRINT_M: 200,     // 全程 1400 米（约 150 秒）；最后 200 米车主发狂冲刺
     STAGE_AT: [0, 350, 700, 1050],     // 四个赛段的起点（米）
     WIN_BONUS: 1500, PAR_T: 130,
-    HIT: 90, FISH_GAIN: 4, TURBO_T: 5, TURBO_GAIN: 36,
+    HIT: 55, FISH_GAIN: 5, TURBO_T: 5, TURBO_GAIN: 36,
     JUMP_V: 800, AIR_JUMP_V: 640, GRAV: 2400, CUT_V: 330, MIN_HOLD: 0.12,
     GLIDE_G: 0.2, GLIDE_FALL: 120, GLIDE_MAX: 1.35, AIR_GLIDE_GAIN: 0.4, FAST_G: 2.4, FAST_V: 950,
     PX_PER_M: 50, SC: 1.15,
@@ -66,7 +66,7 @@
     S.shake = 0; S.flash = 0; S.banner = null;
     S.p = S.newPlayer();
     S.resetOwner();
-    S.run = S.newRun(); S.result = null; S.items.length = 0; S.itemT = 9; S.beatT = 0; S.hopT = 0; S.sprinted = false; S.restM = 260;
+    S.run = S.newRun(); S.result = null; S.items.length = 0; S.itemT = 9; S.beatT = 0; S.hopT = 0; S.sprinted = false; S.restM = 220;
   };
 
   // 开局三选一：点一下既选道具又开跑，比“再点一次开始”多不了一步操作
